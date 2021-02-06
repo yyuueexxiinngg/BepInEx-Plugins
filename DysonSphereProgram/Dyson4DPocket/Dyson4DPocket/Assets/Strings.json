@@ -1,0 +1,36 @@
+﻿{
+  "Version": 1,
+  "HelpText": {
+    "zhCN": "${Key}开关此窗口， 游戏启动后输入存储箱ID后按回车开启存储箱",
+    "enUS": "${Key} to open this window. Enter storage ID and hit Enter to open storage after game loaded.",
+    "frFR": null,
+    "Other": null
+  },
+  "四次元口袋": {
+    "enUS": "4D Pocket"
+  },
+  "检测到更新": {
+    "enUS": "Update available"
+  },
+  "输入存储箱ID": {
+    "enUS": "Enter storage ID"
+  },
+  "请先开始游戏": {
+    "enUS": "Please start game first"
+  },
+  "存储箱ID": {
+    "enUS": "StorageID"
+  },
+  "存储箱ID格式错误, 应为小数(工厂索引.存储箱ID)": {
+    "enUS": "StorageID format error, should be decimal (FactoryIndex.StorageID)"
+  },
+  "存储箱ID不存在": {
+    "enUS": "StorageID does not exist"
+  },
+  "工厂不存在": {
+    "enUS": "Factory does not exist"
+  },
+  "请先关闭目前存储箱": {
+    "enUS": "Please close current storage first"
+  }
+}
