@@ -277,15 +277,32 @@ namespace Dyson4DPocket
             }
             else
             {
-                if (float.TryParse(uwr.downloadHandler.text, out var version))
+                try
                 {
-                    if (version > Version)
+                    var metaInfo = JSON.Parse(uwr.downloadHandler.text);
+                    if (metaInfo != null &&
+                        metaInfo.HasKey("mods") &&
+                        metaInfo["mods"].HasKey("dyson") &&
+                        metaInfo["mods"]["dyson"].HasKey("4DPocket") &&
+                        metaInfo["mods"]["dyson"]["4DPocket"].HasKey("version")
+                    )
                     {
-                        var updateText = Instance._inputField.transform.Find("Panel/4DPocket_Update")
-                            .GetComponent<Text>();
-                        updateText.text = $"{"检测到更新".Translate()}: {version}";
-                        updateText.gameObject.SetActive(true);
+                        if (float.TryParse(metaInfo["mods"]["dyson"]["4DPocket"]["version"], out var version))
+                        {
+                            if (version > Version)
+                            {
+                                var updateText = Instance._inputField.transform.Find("Panel/4DPocket_Update")
+                                    .GetComponent<Text>();
+                                updateText.text = $"{"检测到更新".Translate()}: {version:0.0}";
+                                updateText.gameObject.SetActive(true);
+                            }
+                        }
                     }
+                }
+                catch (Exception e)
+                {
+                    Debug.Log(
+                        $"4DPocket: Error while checking update from {uri}: {uwr.downloadHandler.text} Error: {e.Message}");
                 }
             }
         }
