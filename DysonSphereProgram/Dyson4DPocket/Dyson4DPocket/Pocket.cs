@@ -57,15 +57,15 @@ namespace Dyson4DPocket
     public class The4DPocket : BaseUnityPlugin
     {
         public static ConfigEntry<KeyCode> HotKey;
+        private static Harmony _har;
+        private static Pocket _p;
 
-        void Start()
+        private static void Init()
         {
-            var pocket = new GameObject(typeof(Pocket).FullName).AddComponent<Pocket>();
-            Pocket.Instance = pocket;
-
-            Harmony.CreateAndPatchAll(typeof(Pocket));
-
-            HotKey = Config.Bind("config", "HotKey", KeyCode.F5, "插件按键");
+            _har = Harmony.CreateAndPatchAll(typeof(Pocket));
+            _p = new GameObject(typeof(Pocket).FullName).AddComponent<Pocket>();
+            DontDestroyOnLoad(_p);
+            Pocket.Instance = _p;
 
             var translationsPath = $"{Paths.GameRootPath}/BepInEx/data/4DPocket/Strings.json";
             if (File.Exists(translationsPath))
@@ -78,6 +78,41 @@ namespace Dyson4DPocket
                 File.WriteAllText(translationsPath,
                     "{\"Version\":1,\"HelpText\":{\"zhCN\":\"${Key}开关此窗口， 游戏启动后输入存储箱ID后按回车开启存储箱\",\"enUS\":\"${Key} to open this window. Enter storage ID and hit Enter to open storage after game loaded.\",\"frFR\":null,\"Other\":null},\"四次元口袋\":{\"enUS\":\"4D Pocket\"},\"检测到更新\":{\"enUS\":\"Update available\"},\"输入存储箱ID\":{\"enUS\":\"Enter storage ID\"},\"请先开始游戏\":{\"enUS\":\"Please start game first\"},\"存储箱ID\":{\"enUS\":\"StorageID\"},\"存储箱ID格式错误, 应为小数(工厂索引.存储箱ID)\":{\"enUS\":\"StorageID format error, should be decimal (FactoryIndex.StorageID)\"},\"存储箱ID不存在\":{\"enUS\":\"StorageID does not exist\"},\"工厂不存在\":{\"enUS\":\"Factory does not exist\"}}");
                 ModStringTranslate.LoadTranslations(File.ReadAllText(translationsPath));
+            }
+        }
+
+        void Start()
+        {
+            HotKey = Config.Bind("config", "HotKey", KeyCode.F5, "插件按键");
+            Init();
+        }
+
+        private void OnDestroy()
+        {
+            Debug.Log("Unloading 4D Pocket from ScriptEngine");
+            _har?.UnpatchSelf();
+            if (_p != null)
+            {
+                Destroy(_p);
+            }
+        }
+
+        public static void Main()
+        {
+            Debug.Log("4D Pocket loading from ScriptLoader");
+            HotKey = new ConfigFile(
+                    $"{Paths.GameRootPath}/BepInEx/config/com.github.yyuueexxiinngg.plugin.dyson.4dpocket,cfg", true)
+                .Bind("config", "HotKey", KeyCode.F5, "插件按键");
+            Init();
+        }
+
+        public static void Unload()
+        {
+            Debug.Log("Unloading 4D Pocket from ScriptLoader");
+            _har?.UnpatchSelf();
+            if (_p != null)
+            {
+                Destroy(_p);
             }
         }
     }
@@ -189,70 +224,66 @@ namespace Dyson4DPocket
 
         void OpenStorage(int factoryIndex, int storageId)
         {
-            if (factoryIndex >= 0 && storageId >= 0)
+            if (factoryIndex < 0 || storageId < 0) return;
+            if (!GameMain.isRunning || GameMain.instance.isMenuDemo) return;
+            if (_uiGame == null || _uiStorage == null)
             {
-                if (GameMain.isRunning && !GameMain.instance.isMenuDemo)
+                _uiGame = UIRoot.instance.uiGame;
+                _uiStorage = _uiGame.storageWindow;
+            }
+
+            if (!_uiStorage.inited) return;
+
+            // Not replacing current opened storage window to avoid potential problems
+            if (_uiStorage.active)
+            {
+                UIRealtimeTip.Popup("请先关闭目前存储箱".Translate());
+                return;
+            }
+
+            if (GameMain.data.factories != null &&
+                GameMain.data.factories.Length >= factoryIndex &&
+                GameMain.data.factories[factoryIndex] != null)
+            {
+                try
                 {
-                    if (_uiGame == null || _uiStorage == null)
+                    var factory = GameMain.data.factories[factoryIndex];
+                    var factoryStorage = factory.factoryStorage;
+                    if (factoryStorage.storagePool != null &&
+                        factoryStorage.storagePool.Length >= storageId &&
+                        factoryStorage.storagePool[storageId] != null
+                    )
                     {
-                        _uiGame = UIRoot.instance.uiGame;
-                        _uiStorage = _uiGame.storageWindow;
-                    }
-
-                    if (!_uiStorage.inited) return;
-
-                    // Not replacing current opened storage window to avoid potential problems
-                    if (_uiStorage.active)
-                    {
-                        UIRealtimeTip.Popup("请先关闭目前存储箱".Translate());
-                        return;
-                    }
-
-                    if (GameMain.data.factories != null &&
-                        GameMain.data.factories.Length >= factoryIndex &&
-                        GameMain.data.factories[factoryIndex] != null)
-                    {
-                        try
+                        _uiStorage.storageId = storageId;
+                        Traverse.Create(_uiStorage).Property("active").SetValue(true);
+                        if (!_uiStorage.gameObject.activeSelf)
                         {
-                            var factory = GameMain.data.factories[factoryIndex];
-                            var factoryStorage = factory.factoryStorage;
-                            if (factoryStorage.storagePool != null &&
-                                factoryStorage.storagePool.Length >= storageId &&
-                                factoryStorage.storagePool[storageId] != null
-                            )
-                            {
-                                _uiStorage.storageId = storageId;
-                                Traverse.Create(_uiStorage).Property("active").SetValue(true);
-                                if (!_uiStorage.gameObject.activeSelf)
-                                {
-                                    _uiStorage.gameObject.SetActive(true);
-                                }
+                            _uiStorage.gameObject.SetActive(true);
+                        }
 
-                                _uiStorage.factory = factory;
-                                _uiStorage.factoryStorage = factoryStorage;
-                                _uiStorage.player = GameMain.mainPlayer;
-                                Traverse.Create(_uiStorage).Method("OnStorageIdChange").GetValue();
-                                Traverse.Create(_uiStorage).Field("eventLock").SetValue(true);
-                                _uiStorage.transform.SetAsLastSibling();
-                                _uiGame.OpenPlayerInventory();
-                                _inspectingStorage = true;
-                            }
-                            else
-                            {
-                                UIRealtimeTip.Popup("存储箱ID不存在".Translate());
-                            }
-                        }
-                        catch (Exception message)
-                        {
-                            _inspectingStorage = false;
-                            Debug.Log(message.StackTrace);
-                        }
+                        _uiStorage.factory = factory;
+                        _uiStorage.factoryStorage = factoryStorage;
+                        _uiStorage.player = GameMain.mainPlayer;
+                        Traverse.Create(_uiStorage).Method("OnStorageIdChange").GetValue();
+                        Traverse.Create(_uiStorage).Field("eventLock").SetValue(true);
+                        _uiStorage.transform.SetAsLastSibling();
+                        _uiGame.OpenPlayerInventory();
+                        _inspectingStorage = true;
                     }
                     else
                     {
-                        UIRealtimeTip.Popup("工厂不存在".Translate());
+                        UIRealtimeTip.Popup("存储箱ID不存在".Translate());
                     }
                 }
+                catch (Exception message)
+                {
+                    _inspectingStorage = false;
+                    Debug.Log(message.StackTrace);
+                }
+            }
+            else
+            {
+                UIRealtimeTip.Popup("工厂不存在".Translate());
             }
         }
 
@@ -307,13 +338,6 @@ namespace Dyson4DPocket
             }
         }
 
-        public static void Main()
-        {
-            Debug.Log("4D Pocket loading from ScriptLoader");
-            _har = Harmony.CreateAndPatchAll(typeof(Pocket));
-            Instance = new GameObject(typeof(Pocket).FullName).AddComponent<Pocket>();
-            DontDestroyOnLoad(Instance);
-        }
 
         void Awake()
         {
@@ -461,39 +485,6 @@ namespace Dyson4DPocket
             {
                 Instance.CloseUI();
                 Instance._inputText.text = string.Empty;
-            }
-        }
-
-        public static void Unload()
-        {
-            Debug.Log("Unloading 4D Pocket for ScriptLoader");
-            _har?.UnpatchAll();
-            _har = null;
-            if (Instance != null)
-            {
-                Destroy(Instance);
-                Instance = null;
-            }
-
-            Instance._uiGame = null;
-            Instance._uiStorage = null;
-            Instance._cursorTextObj = null;
-            if (Instance._canvas != null)
-            {
-                Destroy(Instance._canvas);
-                Instance._canvas = null;
-            }
-
-            if (Instance._canvasInstance != null)
-            {
-                Destroy(Instance._canvasInstance);
-                Instance._canvasInstance = null;
-            }
-
-            if (Instance._4dAssetBundle != null)
-            {
-                Instance._4dAssetBundle.Unload(true);
-                Instance._4dAssetBundle = null;
             }
         }
     }
