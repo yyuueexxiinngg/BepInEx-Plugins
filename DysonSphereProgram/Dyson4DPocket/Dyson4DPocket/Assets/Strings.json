@@ -1,8 +1,8 @@
 ﻿{
-  "Version": 1,
+  "Version": 2,
   "HelpText": {
-    "zhCN": "${Key}开关此窗口， 游戏启动后输入存储箱ID后按回车开启存储箱",
-    "enUS": "${Key} to open this window. Enter storage ID and hit Enter to open storage after game loaded.",
+    "zhCN": "${Key}开关此窗口，游戏启动后输入存储箱ID后按回车开启存储箱\n鼠标拖动移动窗口",
+    "enUS": "${Key} to open this window. Enter storage ID and hit Enter to open storage after game loaded.\nDrag to move the window.",
     "frFR": null,
     "Other": null
   },
@@ -32,5 +32,11 @@
   },
   "请先关闭目前存储箱": {
     "enUS": "Please close current storage first"
+  },
+  "输入备注(可选)": {
+    "enUS": "Enter remark (Optional)"
+  },
+  "收藏夹": {
+    "enUS": "Favorites"
   }
 }
