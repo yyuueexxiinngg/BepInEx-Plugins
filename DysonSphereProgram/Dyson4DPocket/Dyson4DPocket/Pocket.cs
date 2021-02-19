@@ -227,7 +227,7 @@ namespace Dyson4DPocket
     {
         public static Pocket Instance;
 
-        private const float Version = 1.1f;
+        private const float Version = 1.2f;
 
         private bool _uiInitialized;
 
@@ -400,7 +400,7 @@ namespace Dyson4DPocket
                 var factory = GameMain.data.factories[factoryIndex];
                 var factoryStorage = factory.factoryStorage;
                 if (factoryStorage.storagePool != null &&
-                    factoryStorage.storagePool.Length >= storageId &&
+                    factoryStorage.storagePool.Length > storageId &&
                     factoryStorage.storagePool[storageId] != null
                 )
                 {
@@ -477,6 +477,8 @@ namespace Dyson4DPocket
         {
             if (factoryIndex < 0 || storageId < 0) return;
             if (!GameMain.isRunning || GameMain.instance.isMenuDemo) return;
+            _lastFactoryIndex = factoryIndex;
+            _lastStorageId = storageId;
             if (_uiGame == null || _uiStorage == null)
             {
                 _uiGame = UIRoot.instance.uiGame;
@@ -501,7 +503,7 @@ namespace Dyson4DPocket
                     var factory = GameMain.data.factories[factoryIndex];
                     var factoryStorage = factory.factoryStorage;
                     if (factoryStorage.storagePool != null &&
-                        factoryStorage.storagePool.Length >= storageId &&
+                        factoryStorage.storagePool.Length > storageId &&
                         factoryStorage.storagePool[storageId] != null
                     )
                     {
@@ -612,26 +614,26 @@ namespace Dyson4DPocket
                     _cursorTextObj.text = _cursorText;
                 }
 
-                if (Input.GetKeyDown(KeyCode.Return))
+                if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
                 {
                     if (_uiActive)
                     {
                         if (_inputText != null)
                         {
                             var split = _inputText.text.Split('.');
-                            if (split.Length == 2 && int.TryParse(split[0], out _lastFactoryIndex) &&
-                                int.TryParse(split[1], out _lastStorageId))
+                            if (split.Length == 2 && int.TryParse(split[0], out var factoryIndex) &&
+                                int.TryParse(split[1], out var storageId))
                             {
                                 if (!_inspectingStorage)
                                 {
                                     CloseUI();
-                                    OpenStorage(_lastFactoryIndex, _lastStorageId);
+                                    OpenStorage(factoryIndex, storageId);
                                 }
                                 else
                                 {
                                     CloseUI();
                                     _uiStorage.storageId = 0;
-                                    OpenStorage(_lastFactoryIndex, _lastStorageId);
+                                    OpenStorage(factoryIndex, storageId);
                                 }
                             }
                             else
@@ -671,10 +673,12 @@ namespace Dyson4DPocket
                 {
                     if (objType == EObjectType.Entity)
                     {
+                        // Trying to inspect another object
                         if (objId != 0)
                         {
                             var factory = GameMain.mainPlayer.factory;
                             var storageId = factory?.entityPool[objId].storageId;
+                            // The other object is another storage
                             if (storageId > 0)
                             {
                                 Instance.CloseStorage();
