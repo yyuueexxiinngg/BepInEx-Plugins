@@ -92,7 +92,7 @@ namespace Dyson4DPocket
         private static XmlSerializer _favStorageItemsSerializer;
         private static Harmony _har;
         private static Pocket _p;
-        private static readonly int TranslationsVersion = 2;
+        private static readonly int TranslationsVersion = 3;
 
         private static void Init()
         {
@@ -216,11 +216,25 @@ namespace Dyson4DPocket
         [XmlElement("Storage")] public List<FavStorageItem> Items { get; set; }
     }
 
+    public class InputItem
+    {
+        public int FactoryIndex;
+        public int ItemID;
+        public InputItemType ItemType;
+    }
+
+    public enum InputItemType
+    {
+        Storage,
+        Station
+    }
+
     public class FavStorageItem
     {
         [XmlElement] public int FactoryIndex;
         [XmlElement] public int StorageID;
         [XmlElement] public string Remark;
+        [XmlElement] public InputItemType Type = InputItemType.Storage;
     }
 
     public class Pocket : MonoBehaviour
@@ -236,6 +250,7 @@ namespace Dyson4DPocket
 
         private UIGame _uiGame;
         private UIStorageWindow _uiStorage;
+        private UIStationWindow _uiStation;
         private Text _cursorTextObj;
         private string _cursorText;
         private GameObject _canvas;
@@ -249,8 +264,11 @@ namespace Dyson4DPocket
         private Text _placeholderText;
 
         private bool _inspectingStorage;
+        private bool _inspectingStation;
         private int _lastFactoryIndex = -1;
         private int _lastStorageId = -1;
+        private int _lastStationFactoryIndex = -1;
+        private int _lastStationId = -1;
 
         private bool _uiActive;
 
@@ -328,23 +346,53 @@ namespace Dyson4DPocket
             }
         }
 
+        private bool TryParseInput(string inputText, out InputItem inputItem)
+        {
+            inputItem = null;
+            var split = inputText.Split('.');
+            if (split.Length == 2)
+            {
+                if (
+                    int.TryParse(split[0], out var factoryIndex) &&
+                    int.TryParse(split[1], out var itemId)
+                )
+                {
+                    inputItem = new InputItem
+                    {
+                        FactoryIndex = factoryIndex,
+                        ItemID = itemId,
+                        ItemType = InputItemType.Storage
+                    };
+                }
+                else if (split[0].ToLower().StartsWith("s") &&
+                         int.TryParse(split[0].ToLower().Replace("s", ""), out factoryIndex) &&
+                         int.TryParse(split[1], out itemId))
+                {
+                    inputItem = new InputItem
+                    {
+                        FactoryIndex = factoryIndex,
+                        ItemID = itemId,
+                        ItemType = InputItemType.Station
+                    };
+                }
+            }
+
+            return false;
+        }
+
         private void OnAddFavBtnClick()
         {
-            var split = _inputText.text.Split('.');
-            if (split.Length == 2 &&
-                int.TryParse(split[0], out var factoryIndex) &&
-                int.TryParse(split[1], out var storageId)
-            )
+            if (TryParseInput(_inputText.text, out var item))
             {
                 AddFavorite(
                     new FavStorageItem
                     {
-                        FactoryIndex = factoryIndex,
-                        StorageID = storageId,
-                        Remark = _remarkInputText.text
+                        FactoryIndex = item.FactoryIndex,
+                        StorageID = item.ItemID,
+                        Remark = _remarkInputText.text,
+                        Type = item.ItemType
                     }
                 );
-                _inputFieldRemark.text = string.Empty;
             }
             else
             {
@@ -355,24 +403,38 @@ namespace Dyson4DPocket
         private void AddFavorite(FavStorageItem favStorageItem, bool initializing = false)
         {
             var fav = Instantiate(_favItem, _favItemHolder.transform, false);
-            // Save ID to object name for RefreshFavoriteStorageItemIcons()
-            fav.name = $"FavItem_{favStorageItem.FactoryIndex}.{favStorageItem.StorageID}";
 
-            fav.GetComponent<Button>().onClick.AddListener((() =>
+            if (favStorageItem.Type == InputItemType.Storage)
             {
-                OpenStorage(favStorageItem.FactoryIndex, favStorageItem.StorageID);
-                CloseUI();
-            }));
+                // Save ID to object name for RefreshFavoriteStorageItemIcons()
+                fav.name = $"FavItem_{favStorageItem.FactoryIndex}.{favStorageItem.StorageID}";
+                fav.GetComponent<Button>().onClick.AddListener(() =>
+                {
+                    OpenStorage(favStorageItem.FactoryIndex, favStorageItem.StorageID);
+                    CloseUI();
+                });
+                fav.transform.Find("StorageID").GetComponent<Text>().text =
+                    $"{favStorageItem.FactoryIndex}.{favStorageItem.StorageID}";
+
+                SetFavStorageItemIcon(favStorageItem.FactoryIndex, favStorageItem.StorageID, fav.transform);
+            }
+            else
+            {
+                fav.name = $"FavItem_s{favStorageItem.FactoryIndex}.{favStorageItem.StorageID}";
+                fav.GetComponent<Button>().onClick.AddListener(() =>
+                {
+                    OpenStation(favStorageItem.FactoryIndex, favStorageItem.StorageID);
+                    CloseUI();
+                });
+                fav.transform.Find("StorageID").GetComponent<Text>().text =
+                    $"S{favStorageItem.FactoryIndex}.{favStorageItem.StorageID}";
+                SetFavStorageItemIcon(favStorageItem.FactoryIndex, favStorageItem.StorageID, fav.transform, true);
+            }
 
             fav.transform.Find("Remark").GetComponent<Text>().text = favStorageItem.Remark;
 
-            fav.transform.Find("StorageID").GetComponent<Text>().text =
-                $"{favStorageItem.FactoryIndex}.{favStorageItem.StorageID}";
-
             fav.transform.Find("Btn_Del").GetComponent<Button>().onClick
                 .AddListener(() => { OnFavDelBtnClick(fav.transform, favStorageItem); });
-
-            SetFavStorageItemIcon(favStorageItem.FactoryIndex, favStorageItem.StorageID, fav.transform);
 
             if (!initializing)
             {
@@ -389,12 +451,18 @@ namespace Dyson4DPocket
             The4DPocket.SaveFavoriteStorages();
         }
 
-        private void SetFavStorageItemIcon(int factoryIndex, int storageId, Transform parent)
+        private void SetFavStorageItemIcon(int factoryIndex, int storageId, Transform parent, bool isStation = false)
         {
+            if (isStation)
+            {
+                parent.Find("FavItemIcon").GetComponent<Image>().sprite = LDB.items.Select(2103).iconSprite;
+                return;
+            }
+
             if (GameMain.isRunning &&
                 !GameMain.instance.isMenuDemo &&
                 GameMain.data.factories != null &&
-                GameMain.data.factories.Length >= factoryIndex &&
+                GameMain.data.factories.Length > factoryIndex &&
                 GameMain.data.factories[factoryIndex] != null)
             {
                 var factory = GameMain.data.factories[factoryIndex];
@@ -418,17 +486,16 @@ namespace Dyson4DPocket
         {
             foreach (Transform child in _favItemHolder.transform)
             {
-                var split = child.name.Replace("FavItem_", "").Split('.');
-                if (split.Length == 2 &&
-                    int.TryParse(split[0], out var factoryIndex) &&
-                    int.TryParse(split[1], out var storageId)
-                )
+                if (TryParseInput(child.name.Replace("FavItem_", ""), out var item))
                 {
-                    SetFavStorageItemIcon(factoryIndex, storageId, child);
-                }
-                else
-                {
-                    UIRealtimeTip.Popup("存储箱ID格式错误, 应为小数(工厂索引.存储箱ID)".Translate());
+                    if (item.ItemType == InputItemType.Storage)
+                    {
+                        SetFavStorageItemIcon(item.FactoryIndex, item.ItemID, child);
+                    }
+                    else
+                    {
+                        SetFavStorageItemIcon(item.FactoryIndex, item.ItemID, child, true);
+                    }
                 }
             }
         }
@@ -473,6 +540,84 @@ namespace Dyson4DPocket
             _uiActive = false;
         }
 
+        private void OpenStation(int factoryIndex, int stationId)
+        {
+            if (factoryIndex < 0 || stationId < 0) return;
+            if (!GameMain.isRunning || GameMain.instance.isMenuDemo) return;
+            _lastFactoryIndex = factoryIndex;
+            _lastStationFactoryIndex = stationId;
+            if (_uiGame == null || (_uiStation) == null)
+            {
+                _uiGame = UIRoot.instance.uiGame;
+                _uiStation = _uiGame.stationWindow;
+            }
+
+            if (!_uiStation.inited) return;
+
+            if (_uiStation.active)
+            {
+                UIRealtimeTip.Popup("请先关闭目前物流站".Translate());
+                return;
+            }
+
+            if (GameMain.data.factories != null &&
+                GameMain.data.factories.Length > factoryIndex &&
+                GameMain.data.factories[factoryIndex] != null)
+            {
+                try
+                {
+                    var factory = GameMain.data.factories[factoryIndex];
+                    var transport = factory.transport;
+                    if (transport.stationPool != null &&
+                        transport.stationPool.Length >= stationId &&
+                        transport.stationPool[stationId] != null
+                    )
+                    {
+                        _uiStation.stationId = stationId;
+                        Traverse.Create(_uiStation).Property("active").SetValue(true);
+                        if (!_uiStation.gameObject.activeSelf)
+                        {
+                            _uiStation.gameObject.SetActive(true);
+                        }
+
+                        _uiStation.factory = factory;
+                        _uiStation.transport = factory.transport;
+                        _uiStation.powerSystem = factory.powerSystem;
+                        _uiStation.player = GameMain.mainPlayer;
+                        Traverse.Create(_uiStation).Method("OnStationIdChange").GetValue();
+                        Traverse.Create(_uiStation).Field("eventLock").SetValue(true);
+
+                        var eventInfo = _uiStation.player.GetType().GetEvent("onIntendToTransferItems");
+                        var methodInfo = _uiStation.GetType()
+                            .GetMethod("OnPlayerIntendToTransferItems", BindingFlags.NonPublic | BindingFlags.Instance);
+
+                        if (eventInfo != null && methodInfo != null)
+                        {
+                            eventInfo.AddEventHandler(_uiStation.player,
+                                Delegate.CreateDelegate(eventInfo.EventHandlerType, _uiStation, methodInfo));
+                        }
+
+                        _uiStation.transform.SetAsLastSibling();
+                        _uiGame.OpenPlayerInventory();
+                        _inspectingStation = true;
+                    }
+                    else
+                    {
+                        UIRealtimeTip.Popup("物流站ID不存在".Translate());
+                    }
+                }
+                catch (Exception message)
+                {
+                    _inspectingStation = false;
+                    Debug.Log(message.StackTrace);
+                }
+            }
+            else
+            {
+                UIRealtimeTip.Popup("工厂不存在".Translate());
+            }
+        }
+
         private void OpenStorage(int factoryIndex, int storageId)
         {
             if (factoryIndex < 0 || storageId < 0) return;
@@ -495,7 +640,7 @@ namespace Dyson4DPocket
             }
 
             if (GameMain.data.factories != null &&
-                GameMain.data.factories.Length >= factoryIndex &&
+                GameMain.data.factories.Length > factoryIndex &&
                 GameMain.data.factories[factoryIndex] != null)
             {
                 try
@@ -544,6 +689,12 @@ namespace Dyson4DPocket
         {
             _uiStorage.storageId = 0;
             _inspectingStorage = false;
+        }
+
+        private void CloseStation()
+        {
+            _uiStation.stationId = 0;
+            _inspectingStation = false;
         }
 
         IEnumerator CheckUpdate()
@@ -620,25 +771,36 @@ namespace Dyson4DPocket
                     {
                         if (_inputText != null)
                         {
-                            var split = _inputText.text.Split('.');
-                            if (split.Length == 2 && int.TryParse(split[0], out var factoryIndex) &&
-                                int.TryParse(split[1], out var storageId))
+                            if (TryParseInput(_inputText.text, out var item))
                             {
-                                if (!_inspectingStorage)
+                                if (item.ItemType == InputItemType.Storage)
                                 {
-                                    CloseUI();
-                                    OpenStorage(factoryIndex, storageId);
+                                    if (!_inspectingStorage)
+                                    {
+                                        CloseUI();
+                                        OpenStorage(item.FactoryIndex, item.ItemID);
+                                    }
+                                    else
+                                    {
+                                        CloseUI();
+                                        _uiStorage.storageId = 0;
+                                        OpenStorage(item.FactoryIndex, item.ItemID);
+                                    }
                                 }
                                 else
                                 {
-                                    CloseUI();
-                                    _uiStorage.storageId = 0;
-                                    OpenStorage(factoryIndex, storageId);
+                                    if (!_inspectingStation)
+                                    {
+                                        CloseUI();
+                                        OpenStation(item.FactoryIndex, item.ItemID);
+                                    }
+                                    else
+                                    {
+                                        CloseUI();
+                                        _uiStation.stationId = 0;
+                                        OpenStation(item.FactoryIndex, item.ItemID);
+                                    }
                                 }
-                            }
-                            else
-                            {
-                                UIRealtimeTip.Popup("存储箱ID格式错误, 应为小数(工厂索引.存储箱ID)".Translate());
                             }
                         }
                     }
@@ -678,10 +840,17 @@ namespace Dyson4DPocket
                         {
                             var factory = GameMain.mainPlayer.factory;
                             var storageId = factory?.entityPool[objId].storageId;
+                            var stationId = factory?.entityPool[objId].stationId;
                             // The other object is another storage
                             if (storageId > 0)
                             {
                                 Instance.CloseStorage();
+                                return true;
+                            }
+
+                            if (stationId > 0)
+                            {
+                                Instance.CloseStation();
                                 return true;
                             }
                         }
@@ -714,9 +883,14 @@ namespace Dyson4DPocket
                     if (factory != null)
                     {
                         var storageId = factory.entityPool[tarId].storageId;
+                        var stationId = factory.entityPool[tarId].stationId;
                         if (storageId > 0)
                         {
                             Instance._cursorText = $"{"存储箱ID".Translate()}: {factory.index}.{storageId}";
+                        }
+                        else if (stationId > 0)
+                        {
+                            Instance._cursorText = $"{"物流站ID".Translate()}: S{factory.index}.{stationId}";
                         }
                     }
                 }
@@ -729,7 +903,7 @@ namespace Dyson4DPocket
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(UIStorageWindow), "_OnClose")]
-        public static void _OnClose(UIStorageWindow __instance)
+        public static void _OnStorageWindowClose(UIStorageWindow __instance)
         {
             if (__instance != null &&
                 __instance.storageId == Instance._lastStorageId &&
@@ -737,6 +911,19 @@ namespace Dyson4DPocket
                 __instance.factory.index == Instance._lastFactoryIndex)
             {
                 Instance._inspectingStorage = false;
+            }
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(UIStationWindow), "_OnClose")]
+        public static void _OnStationWindowClose(UIStationWindow __instance)
+        {
+            if (__instance != null &&
+                __instance.stationId == Instance._lastStationId &&
+                __instance.factory != null &&
+                __instance.factory.index == Instance._lastStationFactoryIndex)
+            {
+                Instance._inspectingStation = false;
             }
         }
 

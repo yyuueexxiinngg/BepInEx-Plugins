@@ -1,8 +1,8 @@
 ﻿{
-  "Version": 2,
+  "Version": 3,
   "HelpText": {
-    "zhCN": "${Key}开关此窗口，游戏启动后输入存储箱ID后按回车开启存储箱\n收藏中点击直接打开对应存储箱\n鼠标拖动移动窗口",
-    "enUS": "${Key} to open this window. Enter storage ID and hit Enter to open storage after game loaded.\nClick item in favorites to open corresponding storage box.\nDrag to move the window.",
+    "zhCN": "${Key}开关此窗口，游戏启动后输入存储箱ID或物流站ID后按回车开启存储箱\n\n<b>物流站ID中`S`大小写不敏感</b>\n\n收藏中点击直接打开对应存储箱或物流站\n\n鼠标拖动移动窗口",
+    "enUS": "${Key} to open this window. Enter storage ID or station ID and hit Enter to open it after game loaded.\n<b>Letter `S` in Station ID is case-insensitive</b>\nClick item in favorites to open corresponding storage box or station.\nDrag to move the window.",
     "frFR": null,
     "Other": null
   },
@@ -27,11 +27,17 @@
   "存储箱ID不存在": {
     "enUS": "StorageID does not exist"
   },
+  "物流站ID不存在": {
+    "enUS": "StationID does not exist"
+  },
   "工厂不存在": {
     "enUS": "Factory does not exist"
   },
   "请先关闭目前存储箱": {
     "enUS": "Please close current storage first"
+  },
+  "请先关闭目前物流站": {
+    "enUS": "Please close current station first"
   },
   "输入备注(可选)": {
     "enUS": "Enter remark (Optional)"
