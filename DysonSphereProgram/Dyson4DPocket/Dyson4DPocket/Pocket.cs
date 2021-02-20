@@ -84,7 +84,7 @@ namespace Dyson4DPocket
         }
     }
 
-    [BepInPlugin("com.github.yyuueexxiinngg.plugin.dyson.4dpocket", "4D Pocket", "1.0")]
+    [BepInPlugin("com.github.yyuueexxiinngg.plugin.dyson.4dpocket", "4D Pocket", "1.3")]
     public class The4DPocket : BaseUnityPlugin
     {
         public static ConfigEntry<KeyCode> HotKey;
@@ -241,7 +241,7 @@ namespace Dyson4DPocket
     {
         public static Pocket Instance;
 
-        private const float Version = 1.2f;
+        private const float Version = 1.3f;
 
         private bool _uiInitialized;
 
@@ -348,6 +348,7 @@ namespace Dyson4DPocket
 
         private bool TryParseInput(string inputText, out InputItem inputItem)
         {
+            inputText = inputText.Trim().ToLower();
             inputItem = null;
             var split = inputText.Split('.');
             if (split.Length == 2)
@@ -363,10 +364,12 @@ namespace Dyson4DPocket
                         ItemID = itemId,
                         ItemType = InputItemType.Storage
                     };
+                    return true;
                 }
-                else if (split[0].ToLower().StartsWith("s") &&
-                         int.TryParse(split[0].ToLower().Replace("s", ""), out factoryIndex) &&
-                         int.TryParse(split[1], out itemId))
+
+                if (split[0].StartsWith("s") &&
+                    int.TryParse(split[0].Replace("s", ""), out factoryIndex) &&
+                    int.TryParse(split[1], out itemId))
                 {
                     inputItem = new InputItem
                     {
@@ -374,6 +377,7 @@ namespace Dyson4DPocket
                         ItemID = itemId,
                         ItemType = InputItemType.Station
                     };
+                    return true;
                 }
             }
 
@@ -477,9 +481,12 @@ namespace Dyson4DPocket
                     {
                         parent.Find("FavItemIcon").GetComponent<Image>().sprite =
                             LDB.items.Select(iconId0).iconSprite;
+                        return;
                     }
                 }
             }
+
+            parent.Find("FavItemIcon").GetComponent<Image>().sprite = null;
         }
 
         private void RefreshFavoriteStorageItemIcons()
@@ -801,6 +808,10 @@ namespace Dyson4DPocket
                                         OpenStation(item.FactoryIndex, item.ItemID);
                                     }
                                 }
+                            }
+                            else
+                            {
+                                UIRealtimeTip.Popup("存储箱ID格式错误, 应为小数(工厂索引.存储箱ID)".Translate());
                             }
                         }
                     }
