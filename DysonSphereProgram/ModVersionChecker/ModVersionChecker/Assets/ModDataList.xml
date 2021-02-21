@@ -29,6 +29,10 @@
         <FullName>xiaoye97-SuperBelt</FullName>
     </Mod>
     <Mod>
+        <GUID>me.sky.plugin.Dyson.QTools</GUID>
+        <FullName>sherlockHlb-QTools</FullName>
+    </Mod>
+    <Mod>
         <GUID>bifrom.com.DSP.AssemblerVerticalConstruction</GUID>
         <FullName>57a103a40a4d4d7f-AssemblerVerticalConstruction</FullName>
     </Mod>
