@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModVersionChecker", "ModVersionChecker\ModVersionChecker.csproj", "{D9D0663D-5A08-4C3C-B972-327522FE7ADD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D9D0663D-5A08-4C3C-B972-327522FE7ADD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9D0663D-5A08-4C3C-B972-327522FE7ADD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9D0663D-5A08-4C3C-B972-327522FE7ADD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9D0663D-5A08-4C3C-B972-327522FE7ADD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
