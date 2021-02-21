@@ -272,10 +272,11 @@ namespace ModVersionChecker
             {
                 mergedModDataList = preservedModDataList;
                 var modDataXml = uwr.downloadHandler.text;
-                using var reader = new StringReader(modDataXml);
-
                 try
                 {
+                    using var reader = new StringReader(modDataXml);
+                    // https://answers.unity.com/questions/10904/xmlexception-text-node-canot-appear-in-this-state.html
+                    reader.Read();
                     var modDataList = (ModDataList) _modDataSerializer.Deserialize(reader);
                     reader.Close();
 
@@ -294,7 +295,7 @@ namespace ModVersionChecker
                     _progressText.text =
                         "Unable to fetch latest mod data list, try using saved cache instead".Translate();
                     Debug.Log("Unable to fetch latest mod data list, try using saved cache instead".Translate() +
-                              e.StackTrace);
+                              e.Message + e.StackTrace);
                     mergedModDataList = LoadMergedModDataList();
                     foreach (var modData in preservedModDataList.Items)
                     {

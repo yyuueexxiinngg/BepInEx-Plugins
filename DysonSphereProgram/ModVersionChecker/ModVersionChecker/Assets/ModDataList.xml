@@ -5,6 +5,10 @@
         <FullName>yyuueexxiinngg-4DPocket</FullName>
     </Mod>
     <Mod>
+        <GUID>com.github.yyuueexxiinngg.plugin.modversionchecker</GUID>
+        <FullName>yyuueexxiinngg-ModVersionChecker</FullName>
+    </Mod>
+    <Mod>
         <GUID>org.fezeral.plugins.copyinserters</GUID>
         <FullName>thisisbrad-CopyInserters</FullName>
     </Mod>
