@@ -83,7 +83,7 @@
         </Reference>
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="Checker.cs" />
+        <Compile Include="ModVersionChecker.cs" />
         <Compile Include="Localization.cs" />
         <Compile Include="MouseDragBehaviour.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />

@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Xml.Serialization;
 using BepInEx;
 using BepInEx.Configuration;
+using HarmonyLib;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
@@ -87,12 +88,16 @@ namespace ModVersionChecker
     }
 
     [BepInPlugin("com.github.yyuueexxiinngg.plugin.modversionchecker", "Mod Version Checker", "1.0")]
-    public class Checker : BaseUnityPlugin
+    public class ModVersionChecker : BaseUnityPlugin
     {
+        private static ModVersionChecker _instance;
+
         private const float Version = 1.0f;
         private static readonly int TranslationsVersion = 1;
         private static XmlSerializer _modDataSerializer;
-        private static Dictionary<string, string> _modNameMapDict = new();
+
+        // Hold all founded map of plugin full name to guid, item get removed one done checking 
+        private static Dictionary<string, string> _tempModNameMapDictQueuedForChecking = new();
         private static Dictionary<string, GameObject> _modDataBtnDict = new();
         private static Dictionary<string, System.Version> _modCurrentVersionDict = new();
 
@@ -107,6 +112,7 @@ namespace ModVersionChecker
         private Text _progressText;
         private GameObject _canvas;
         private GameObject _modDataHolder;
+        private bool _uiInitialized;
 
         private void Init()
         {
@@ -178,6 +184,11 @@ namespace ModVersionChecker
             _canvas.transform
                 .Find("Panel/Title")
                 .GetComponent<Text>().text = "Mod Version Checker".Translate() + Version.ToString("0.0");
+            _canvas.transform
+                .Find("Panel/Btn_Close")
+                .GetComponent<Button>().onClick.AddListener(CloseUI);
+
+            _uiInitialized = true;
         }
 
         // ManualSetModDataList + Fetched mod data list => Merged mod data list
@@ -320,7 +331,7 @@ namespace ModVersionChecker
                     modData.Button.transform.SetAsFirstSibling();
                 }
 
-                _modNameMapDict.Add(modData.FullName, modData.GUID);
+                _tempModNameMapDictQueuedForChecking.Add(modData.FullName, modData.GUID);
             }
 
             StartCoroutine(CheckVersions());
@@ -346,9 +357,9 @@ namespace ModVersionChecker
                 {
                     if (package.Value.HasKey("package") && package.Value["package"].HasKey("full_name"))
                     {
-                        if (_modNameMapDict.ContainsKey(package.Value["package"]["full_name"]))
+                        if (_tempModNameMapDictQueuedForChecking.ContainsKey(package.Value["package"]["full_name"]))
                         {
-                            var guid = _modNameMapDict[package.Value["package"]["full_name"]];
+                            var guid = _tempModNameMapDictQueuedForChecking[package.Value["package"]["full_name"]];
                             if (_modDataBtnDict.ContainsKey(guid))
                             {
                                 var latestVersion =
@@ -370,7 +381,23 @@ namespace ModVersionChecker
                                     _modDataBtnDict[guid].transform.SetAsFirstSibling();
                                 }
                             }
+
+                            _tempModNameMapDictQueuedForChecking.Remove(package.Value["package"]["full_name"]);
                         }
+                    }
+                }
+
+                foreach (var notFoundMod in _tempModNameMapDictQueuedForChecking)
+                {
+                    if (_modDataBtnDict.ContainsKey(notFoundMod.Value))
+                    {
+                        _modDataBtnDict[notFoundMod.Value].transform.transform
+                            .Find("LatestVersion")
+                            .GetComponent<Text>().text = "Failed".Translate();
+                    }
+                    else
+                    {
+                        Debug.Log($"ModVersionChecker: Unexpected mod entry {notFoundMod.Value}");
                     }
                 }
 
@@ -450,6 +477,16 @@ namespace ModVersionChecker
             Debug.Log("Unloading Mod Version Checker from ScriptEngine");
             Destroy(_canvasPrefab);
             Destroy(_canvas);
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(GameMain), "End")]
+        public static void OnGameEnd()
+        {
+            if (_instance._uiInitialized)
+            {
+                _instance.CloseUI();
+            }
         }
     }
 }

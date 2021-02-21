@@ -81,6 +81,14 @@
         <FullName>jinxOAO-NoAutoZoomIn</FullName>
     </Mod>
     <Mod>
+        <GUID>GniMaerd.DSP.plugin.MusicBox</GUID>
+        <FullName>jinxOAO-MusicBox</FullName>
+    </Mod>
+    <Mod>
+        <GUID>Gnimaerd.DSP.plugin.SmelterMiner</GUID>
+        <FullName>jinxOAO-SmelterMiner</FullName>
+    </Mod>
+    <Mod>
         <GUID>org.bepinex.plugins.moreorlessdense</GUID>
         <FullName>Zorb-MoreOrLessDense</FullName>
     </Mod>
@@ -91,6 +99,10 @@
     <Mod>
         <GUID>org.bepinex.plugins.alternatestart</GUID>
         <FullName>Zorb-Zorbs_Alternative_Start</FullName>
+    </Mod>
+    <Mod>
+        <GUID>zorb.dsp.plugins.vegeandveinhelper</GUID>
+        <FullName>Zorb-Vein_and_Vege_Helper</FullName>
     </Mod>
     <Mod>
         <GUID>org.bepinex.plugins.morereplication</GUID>
@@ -157,10 +169,6 @@
         <FullName>HeavyFlagship-AdvanceNuclear</FullName>
     </Mod>
     <Mod>
-        <GUID>GniMaerd.DSP.plugin.MusicBox</GUID>
-        <FullName>jinxOAO-MusicBox</FullName>
-    </Mod>
-    <Mod>
         <GUID>io.github.markusmo3.dsp.smolsplitters</GUID>
         <FullName>markusmo3-SmolSplitters</FullName>
     </Mod>
@@ -211,6 +219,10 @@
     <Mod>
         <GUID>crecheng.Tp</GUID>
         <FullName>crecheng-Tp</FullName>
+    </Mod>
+    <Mod>
+        <GUID>crecheng.CopyPlanetFactory</GUID>
+        <FullName>crecheng-CopyPlanetFactory</FullName>
     </Mod>
     <Mod>
         <GUID>com.sp00ktober.DSPMods</GUID>
