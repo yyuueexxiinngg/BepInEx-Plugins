@@ -109,6 +109,10 @@
         <FullName>Zorb-Vein_and_Vege_Helper</FullName>
     </Mod>
     <Mod>
+        <GUID>org.bepinex.plugins.moreplanettypes</GUID>
+        <FullName>Zorb-More_Planet_Types</FullName>
+    </Mod>
+    <Mod>
         <GUID>org.bepinex.plugins.morereplication</GUID>
         <FullName>HarriXS-More_Replication</FullName>
     </Mod>
@@ -201,6 +205,10 @@
         <FullName>Alejandro1-Denseiverse</FullName>
     </Mod>
     <Mod>
+        <GUID>org.bepinex.plugins.buildanywhere</GUID>
+        <FullName>Alejandro1-BuildAnywhere</FullName>
+    </Mod>
+    <Mod>
         <GUID>me.iwasomen.plugin.DysonMod</GUID>
         <FullName>iWasOmen-SulfuricAcidElectrolysis</FullName>
     </Mod>
@@ -239,6 +247,10 @@
     <Mod>
         <GUID>greyhak.dysonsphereprogram.resourcespreadsheetgen</GUID>
         <FullName>GreyHak-DSP_Star_Sector_Resource_Spreadsheet_Generator</FullName>
+    </Mod>
+    <Mod>
+        <GUID>greyhak.dysonsphereprogram.droneclearing</GUID>
+        <FullName>GreyHak-DSP_Drone_Clearing</FullName>
     </Mod>
     <Mod>
         <GUID>com.muchaszewski.dsp_translationPlugin</GUID>
