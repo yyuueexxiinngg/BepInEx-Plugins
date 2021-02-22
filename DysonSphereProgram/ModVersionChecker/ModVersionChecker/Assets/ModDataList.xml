@@ -272,4 +272,8 @@
         <GUID>org.zomatree.plugins.DiscordRPC</GUID>
         <FullName>Zomatree-Discord_RPC</FullName>
     </Mod>
+    <Mod>
+        <GUID>KingEnderBrine.SplitterOverConveyor</GUID>
+        <FullName>KingEnderBrine-SplitterOverConveyor</FullName>
+    </Mod>
 </ModDataList>
