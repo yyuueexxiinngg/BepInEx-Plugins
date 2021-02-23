@@ -1,5 +1,5 @@
 ﻿{
-  "Version": 1,
+  "Version": 2,
   "Mod Version Checker": {
     "zhCN": "Mod版本检测",
     "enUS": "Mod Version Checker",
@@ -44,5 +44,8 @@
   },
   "Finish checking versions, click item to open mod's download page in browser": {
     "zhCN": "已完成版本检测, 点击列表中项目在浏览器中打开Mod下载主页"
+  },
+  "Set As Latest": {
+    "zhCN": "设置为最新版本"
   }
 }

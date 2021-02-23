@@ -96,7 +96,10 @@
       <EmbeddedResource Include="Assets\Strings.json" />
     </ItemGroup>
     <ItemGroup>
+      <Content Include="Assets\Screenshot_1.1_CN.png" />
+      <Content Include="Assets\Screenshot_1.1_EN.png" />
       <Content Include="Assets\ModDataList.xml" />
+      <Content Include="README.md" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

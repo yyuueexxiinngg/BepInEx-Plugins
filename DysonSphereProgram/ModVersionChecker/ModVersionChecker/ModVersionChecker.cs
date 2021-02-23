@@ -87,19 +87,43 @@ namespace ModVersionChecker
         }
     }
 
-    [BepInPlugin("com.github.yyuueexxiinngg.plugin.modversionchecker", "Mod Version Checker", "1.0")]
+    /**
+     * List to hold custom version of plugin
+     * Checker will assume version set in here as installed plugin version
+     * Mod developer sometimes release a new version but not changing the version fed into BepInEx
+     */
+    [XmlRoot]
+    public class LocalModCustomVersionList
+    {
+        public LocalModCustomVersionList()
+        {
+            Items = new List<ModVersion>();
+        }
+
+        [XmlElement("Mod")] public List<ModVersion> Items { get; set; }
+    }
+
+    public class ModVersion
+    {
+        [XmlElement] public string GUID;
+        [XmlElement] public string Version;
+    }
+
+    [BepInPlugin("com.github.yyuueexxiinngg.plugin.modversionchecker", "Mod Version Checker", "1.1")]
     public class ModVersionChecker : BaseUnityPlugin
     {
         private static ModVersionChecker _instance;
 
-        private const float Version = 1.0f;
-        private static readonly int TranslationsVersion = 1;
+        private const float Version = 1.1f;
+        private static readonly int TranslationsVersion = 2;
         private static XmlSerializer _modDataSerializer;
+        private static XmlSerializer _modVersionSerializer;
 
         // Hold all founded map of plugin full name to guid, item get removed one done checking 
         private static Dictionary<string, string> _tempModNameMapDictQueuedForChecking = new();
         private static Dictionary<string, GameObject> _modDataBtnDict = new();
         private static Dictionary<string, System.Version> _modCurrentVersionDict = new();
+        private static Dictionary<string, System.Version> _modCustomVersionDict = new();
 
         private ConfigEntry<KeyboardShortcut> _hotKey;
         private ConfigEntry<string> _modDataUrl;
@@ -132,14 +156,15 @@ namespace ModVersionChecker
                 "https://mod-version.xcpx.workers.dev/modverchecker/dyson",
                 "Mod数据获取地址, 用来跟BepInEx中的插件相对应, 通过GUID和FullName来试检测器定位插件在ThunderStore的位置, 仅当语言设置为中文时使用此链接(上面那个链接可能国内访问速度慢)");
 
-            _timeoutSec = Config.Bind("config", "TimeoutSecond",
-                60 * 5,
+            _timeoutSec = Config.Bind("config", "TimeoutSecond", 60,
                 "Timeout for mod update checking");
 
             UpdateAndLoadTranslations();
             InitUI();
             _modDataSerializer = new XmlSerializer(typeof(ModDataList));
+            _modVersionSerializer = new XmlSerializer(typeof(LocalModCustomVersionList));
             _progressText.text = "Initializing".Translate();
+            LoadModLocalCustomVersionList();
             StartCoroutine(InitModDataListThenCheckVersions());
 
             foreach (var plugin in BepInEx.Bootstrap.Chainloader.PluginInfos)
@@ -149,14 +174,26 @@ namespace ModVersionChecker
                     .Find("ModName")
                     .GetComponent<Text>().text = plugin.Value.Metadata.Name;
                 modDataBtn.transform
-                    .Find("CurrentVersion")
-                    .GetComponent<Text>().text = plugin.Value.Metadata.Version.ToString();
-                modDataBtn.transform
                     .Find("LatestVersion")
                     .GetComponent<Text>().text = "Unsupported".Translate();
                 modDataBtn.transform.SetAsLastSibling();
 
-                _modCurrentVersionDict.Add(plugin.Key, plugin.Value.Metadata.Version);
+                // Use has set custom version for this mod
+                if (_modCustomVersionDict.ContainsKey(plugin.Key))
+                {
+                    modDataBtn.transform
+                        .Find("CurrentVersion")
+                        .GetComponent<Text>().text = _modCustomVersionDict[plugin.Key].ToString();
+                    _modCurrentVersionDict.Add(plugin.Key, _modCustomVersionDict[plugin.Key]);
+                }
+                else
+                {
+                    modDataBtn.transform
+                        .Find("CurrentVersion")
+                        .GetComponent<Text>().text = plugin.Value.Metadata.Version.ToString();
+                    _modCurrentVersionDict.Add(plugin.Key, plugin.Value.Metadata.Version);
+                }
+
                 _modDataBtnDict.Add(plugin.Key, modDataBtn);
             }
         }
@@ -177,6 +214,8 @@ namespace ModVersionChecker
 
             _modDataPrefab.transform.Find("CurVerLabel").GetComponent<Text>().text = "Current\nVersion".Translate();
             _modDataPrefab.transform.Find("LatestVerLabel").GetComponent<Text>().text = "Latest\nVersion".Translate();
+            _modDataPrefab.transform.Find("Btn_SetAsLatest/Text").GetComponent<Text>().text =
+                "Set As Latest".Translate();
 
             ab.Unload(false);
 
@@ -223,6 +262,49 @@ namespace ModVersionChecker
                 writer.Close();
                 return modDataList;
             }
+        }
+
+        private static void LoadModLocalCustomVersionList()
+        {
+            var localModVersionListPath =
+                $"{Paths.GameRootPath}/BepInEx/data/ModVersionChecker/CustomModCurrentVersionList.xml";
+            if (File.Exists(localModVersionListPath))
+            {
+                var reader = new StreamReader(localModVersionListPath);
+                var modCustomVersionList = (LocalModCustomVersionList) _modVersionSerializer.Deserialize(reader);
+                reader.Close();
+                foreach (var customModVersion in modCustomVersionList.Items)
+                {
+                    if (!_modCustomVersionDict.ContainsKey(customModVersion.GUID))
+                    {
+                        _modCustomVersionDict.Add(customModVersion.GUID, new System.Version(customModVersion.Version));
+                    }
+                }
+            }
+        }
+
+        private static void SaveLocalModCustomVersionList()
+        {
+            var localModVersionListPath =
+                $"{Paths.GameRootPath}/BepInEx/data/ModVersionChecker/CustomModCurrentVersionList.xml";
+            if (!File.Exists(localModVersionListPath))
+            {
+                new FileInfo(localModVersionListPath).Directory?.Create();
+            }
+
+            var modCustomVersionList = new LocalModCustomVersionList();
+            foreach (var key in _modCustomVersionDict.Keys)
+            {
+                modCustomVersionList.Items.Add(new ModVersion
+                {
+                    GUID = key,
+                    Version = _modCustomVersionDict[key].ToString()
+                });
+            }
+
+            var writer = new StreamWriter(localModVersionListPath);
+            _modVersionSerializer.Serialize(writer, modCustomVersionList);
+            writer.Close();
         }
 
         private static void SaveMergedModDataList(ModDataList modDataList)
@@ -379,6 +461,31 @@ namespace ModVersionChecker
                                         .Find("LatestVersion")
                                         .GetComponent<Text>().color = Color.red;
                                     _modDataBtnDict[guid].transform.SetAsFirstSibling();
+
+                                    var btnSetAsLatest = _modDataBtnDict[guid].transform
+                                        .Find("Btn_SetAsLatest")
+                                        .GetComponent<Button>();
+                                    btnSetAsLatest.onClick.AddListener(() =>
+                                    {
+                                        _modDataBtnDict[guid].transform
+                                            .Find("CurrentVersion")
+                                            .GetComponent<Text>().text = latestVersion.ToString();
+                                        _modDataBtnDict[guid].transform
+                                            .Find("LatestVersion")
+                                            .GetComponent<Text>().color = Color.black;
+
+                                        if (!_modCustomVersionDict.ContainsKey(guid))
+                                        {
+                                            _modCustomVersionDict.Add(guid, latestVersion);
+                                        }
+                                        else
+                                        {
+                                            _modCustomVersionDict[guid] = latestVersion;
+                                        }
+
+                                        SaveLocalModCustomVersionList();
+                                    });
+                                    btnSetAsLatest.gameObject.SetActive(true);
                                 }
                             }
 
@@ -401,7 +508,7 @@ namespace ModVersionChecker
                     }
                 }
 
-                _progressText.fontSize = 9;
+                _progressText.fontSize = 11;
                 _progressText.text = "Finish checking versions, click item to open mod's download page in browser"
                     .Translate();
             }

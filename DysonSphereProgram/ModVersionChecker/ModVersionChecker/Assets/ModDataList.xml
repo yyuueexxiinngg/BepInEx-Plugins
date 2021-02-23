@@ -93,6 +93,10 @@
         <FullName>jinxOAO-SmelterMiner</FullName>
     </Mod>
     <Mod>
+        <GUID>Gnimaerd.DSP.plugin.UniverseScience</GUID>
+        <FullName>jinxOAO-UniverseScience</FullName>
+    </Mod>
+    <Mod>
         <GUID>org.bepinex.plugins.moreorlessdense</GUID>
         <FullName>Zorb-MoreOrLessDense</FullName>
     </Mod>
@@ -275,5 +279,13 @@
     <Mod>
         <GUID>KingEnderBrine.SplitterOverConveyor</GUID>
         <FullName>KingEnderBrine-SplitterOverConveyor</FullName>
+    </Mod>
+    <Mod>
+        <GUID>com.brokenmass.plugin.Dyson.SphereSaveFix</GUID>
+        <FullName>brokenmass-SphereSaveFix</FullName>
+    </Mod>
+    <Mod>
+        <GUID>helmod.dsp.plugin</GUID>
+        <FullName>Helfima-DSP_Helmod</FullName>
     </Mod>
 </ModDataList>
