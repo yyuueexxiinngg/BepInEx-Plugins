@@ -288,4 +288,8 @@
         <GUID>helmod.dsp.plugin</GUID>
         <FullName>Helfima-DSP_Helmod</FullName>
     </Mod>
+    <Mod>
+        <GUID>SuperNightLight</GUID>
+        <FullName>AlphaDSPMod-SuperNightLight</FullName>
+    </Mod>
 </ModDataList>
