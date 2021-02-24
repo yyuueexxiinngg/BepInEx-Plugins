@@ -57,6 +57,10 @@
         <FullName>Taki7o7-GigaStations</FullName>
     </Mod>
     <Mod>
+        <GUID>com.Taki7o7.GigaStations_v2</GUID>
+        <FullName>Taki7o7-GigaStations_v2</FullName>
+    </Mod>
+    <Mod>
         <GUID>com.Taki7o7.MechaEnergyUseMultiplier</GUID>
         <FullName>Taki7o7-Mecha_Energy_Usage_Multiplier</FullName>
     </Mod>
@@ -239,6 +243,10 @@
     <Mod>
         <GUID>crecheng.CopyPlanetFactory</GUID>
         <FullName>crecheng-CopyPlanetFactory</FullName>
+    </Mod>
+    <Mod>
+        <GUID>DysonSpheresSpeed</GUID>
+        <FullName>crecheng-DysonSpheresSpeed</FullName>
     </Mod>
     <Mod>
         <GUID>com.sp00ktober.DSPMods</GUID>
