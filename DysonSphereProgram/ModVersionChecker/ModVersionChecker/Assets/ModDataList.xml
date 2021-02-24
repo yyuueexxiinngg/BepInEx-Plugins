@@ -292,4 +292,12 @@
         <GUID>SuperNightLight</GUID>
         <FullName>AlphaDSPMod-SuperNightLight</FullName>
     </Mod>
+    <Mod>
+        <GUID>mod.jamesfire.FusionStars</GUID>
+        <FullName>JamesFire-FusionPower</FullName>
+    </Mod>
+    <Mod>
+        <GUID>mod.jamesfire.FusionForge</GUID>
+        <FullName>JamesFire-FusionForge</FullName>
+    </Mod>
 </ModDataList>
