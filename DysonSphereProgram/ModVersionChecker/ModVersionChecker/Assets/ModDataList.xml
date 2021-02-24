@@ -293,6 +293,10 @@
         <FullName>brokenmass-SphereSaveFix</FullName>
     </Mod>
     <Mod>
+        <GUID>com.brokenmass.plugin.DSP.FastAbsorption</GUID>
+        <FullName>brokenmass-FastAbsorption</FullName>
+    </Mod>
+    <Mod>
         <GUID>helmod.dsp.plugin</GUID>
         <FullName>Helfima-DSP_Helmod</FullName>
     </Mod>
