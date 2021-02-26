@@ -305,11 +305,19 @@
         <FullName>AlphaDSPMod-SuperNightLight</FullName>
     </Mod>
     <Mod>
+        <GUID>MoreGraphicsOptions</GUID>
+        <FullName>AlphaDSPMod-MoreGraphicsOptions</FullName>
+    </Mod>
+    <Mod>
         <GUID>mod.jamesfire.FusionStars</GUID>
         <FullName>JamesFire-FusionPower</FullName>
     </Mod>
     <Mod>
         <GUID>mod.jamesfire.FusionForge</GUID>
         <FullName>JamesFire-FusionForge</FullName>
+    </Mod>
+    <Mod>
+        <GUID>com.kAIS.KAIDSPModel</GUID>
+        <FullName>kjkjkAIStudio-KAIDSPModel</FullName>
     </Mod>
 </ModDataList>
