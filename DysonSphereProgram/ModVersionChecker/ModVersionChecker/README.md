@@ -54,6 +54,10 @@ newer version for it.
   version
     - Mod developer did not change the `GUID` of his modified mod, checker use `GUID` to identify mods. In this case, it
       points to the original mod
+- Once `Set As Latest` was used, updated plugin not getting correct current version
+    - Resolved in v1.2
+- Mod was supported, but now showing `Unsupported` after update
+    - Mod developer changed mod's `GUID`, please file an issue
 
 ### Configuration
 
@@ -71,10 +75,18 @@ newer version for it.
 
 ### Change log
 
+#### V1.2
+
+- **Fix once `Set As Latest` was used, checker will always use that version as current version even if the plugin
+  actually got updated and developer set the correct version.**
+- Now checker window will be closed automatically when game play starts
+
 #### V1.1
 
 - Add support for setting mod current version as latest in case mod developer forgot to change the version fed into
   BepInEx in code upon releasing a new version
+
+### Any feedback? Post in [GitHub repo](https://github.com/yyuueexxiinngg/BepInEx-Plugins/)
 
 # Mod版本检测器
 
@@ -125,6 +137,10 @@ Mod列表保存BepInEx中插件的`GUID`与其在ThunderStore上`Full name`的�
       自定义版本保存在: `游戏根目录\BepInEx\data\ModVersionChecker\CustomModCurrentVersionList.xml`
 - 如[QTool_Model_plus](https://dsp.thunderstore.io/package/sherlockHlb/QTool_Model_plus/) 这样的Mod最新版本不正确
     - Mod开发者修改Mod时没有修改其`GUID`, 检测器依赖`GUID`来区分Mod, 在这个例子中, 他指向了原Mod
+- 一旦使用过 `设置为最新版本`, 更新后的插件获取的目前版本不正确
+    - v1.2 中已修复
+- Mod本来支持检测版本, 更新后变成`未支持`
+    - Mod开发者更改了插件的`GUID`, 请在GitHub中新建Issue
 
 ### 配置方法
 
@@ -140,6 +156,13 @@ Mod列表保存BepInEx中插件的`GUID`与其在ThunderStore上`Full name`的�
 
 ### 更新日志
 
+#### V1.2
+
+- **修复一旦使用过 `设置为最新版本`, 检测器会一直把此版本号当做目前版本, 就算插件更新过且开发者已经把版本设置正确**
+- 现在检测器窗口会在开始游玩时自动关闭
+
 #### V1.1
 
 - 添加支持将Mod最新版本设置为已安装的版本, 避免当Mod开发者发布新版本后忘记修改代码中的版本时总是提示此Mod有更新
+
+### 有任何反馈? [GitHub repo](https://github.com/yyuueexxiinngg/BepInEx-Plugins/)

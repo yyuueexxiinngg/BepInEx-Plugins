@@ -101,6 +101,10 @@
         <FullName>jinxOAO-UniverseScience</FullName>
     </Mod>
     <Mod>
+        <GUID>GniMaerd.DSP.plugin.CustomizeBGM</GUID>
+        <FullName>jinxOAO-CustomizeBGM</FullName>
+    </Mod>
+    <Mod>
         <GUID>org.bepinex.plugins.moreorlessdense</GUID>
         <FullName>Zorb-MoreOrLessDense</FullName>
     </Mod>
@@ -247,6 +251,10 @@
     <Mod>
         <GUID>DysonSpheresSpeed</GUID>
         <FullName>crecheng-DysonSpheresSpeed</FullName>
+    </Mod>
+    <Mod>
+        <GUID>crecheng.CanNotShowDyson</GUID>
+        <FullName>crecheng-CanNotShowDyson</FullName>
     </Mod>
     <Mod>
         <GUID>com.sp00ktober.DSPMods</GUID>
