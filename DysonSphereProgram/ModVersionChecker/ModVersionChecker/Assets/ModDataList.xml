@@ -305,6 +305,10 @@
         <FullName>brokenmass-FastAbsorption</FullName>
     </Mod>
     <Mod>
+        <GUID>com.brokenmass.plugin.DSP.AdvancedStarmap</GUID>
+        <FullName>brokenmass-AdvancedStarmap</FullName>
+    </Mod>
+    <Mod>
         <GUID>helmod.dsp.plugin</GUID>
         <FullName>Helfima-DSP_Helmod</FullName>
     </Mod>
@@ -327,5 +331,13 @@
     <Mod>
         <GUID>com.kAIS.KAIDSPModel</GUID>
         <FullName>kjkjkAIStudio-KAIDSPModel</FullName>
+    </Mod>
+    <Mod>
+        <GUID>pasukaru.dsp.AutoStationConfig</GUID>
+        <FullName>Pasukaru-AutoStationConfig</FullName>
+    </Mod>
+    <Mod>
+        <GUID>org.therzok.dsp.OrderSaves</GUID>
+        <FullName>Therzok-OrderSaves</FullName>
     </Mod>
 </ModDataList>
