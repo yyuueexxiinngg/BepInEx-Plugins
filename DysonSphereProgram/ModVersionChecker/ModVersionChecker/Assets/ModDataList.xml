@@ -257,6 +257,10 @@
         <FullName>crecheng-CanNotShowDyson</FullName>
     </Mod>
     <Mod>
+        <GUID>crecheng.CanNotShowItem</GUID>
+        <FullName>crecheng-CanNotShowItem</FullName>
+    </Mod>
+    <Mod>
         <GUID>com.sp00ktober.DSPMods</GUID>
         <FullName>sp00ktober-RenderDistance</FullName>
     </Mod>
@@ -309,6 +313,14 @@
         <FullName>brokenmass-AdvancedStarmap</FullName>
     </Mod>
     <Mod>
+        <GUID>com.brokenmass.plugin.DSP.RailgunsRetargeting</GUID>
+        <FullName>brokenmass-RailgunsRetargeting</FullName>
+    </Mod>
+    <Mod>
+        <GUID>com.brokenmass.plugin.DSP.BuildCounter</GUID>
+        <FullName>brokenmass-BuildCounter</FullName>
+    </Mod>
+    <Mod>
         <GUID>helmod.dsp.plugin</GUID>
         <FullName>Helfima-DSP_Helmod</FullName>
     </Mod>
@@ -339,5 +351,21 @@
     <Mod>
         <GUID>org.therzok.dsp.OrderSaves</GUID>
         <FullName>Therzok-OrderSaves</FullName>
+    </Mod>
+    <Mod>
+        <GUID>MultiplierChanger</GUID>
+        <FullName>KG-Speed_multipliers_changer</FullName>
+    </Mod>
+    <Mod>
+        <GUID>InfSelectionrange</GUID>
+        <FullName>KG-Long_Building_Selection_and_Free_M_Globalmap</FullName>
+    </Mod>
+    <Mod>
+        <GUID>org.flame.mods.dysonsphere.dsptracker</GUID>
+        <FullName>skandragon-DSP_Resource_Tracker</FullName>
+    </Mod>
+    <Mod>
+        <GUID>r0uv3n.DSP.plugins.betterlogisticstations</GUID>
+        <FullName>r0uv3n-BetterLogisticsStations</FullName>
     </Mod>
 </ModDataList>
