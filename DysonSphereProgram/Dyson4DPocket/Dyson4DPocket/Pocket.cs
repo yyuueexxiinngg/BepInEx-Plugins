@@ -11,6 +11,11 @@ using UnityEngine.UI;
 using HarmonyLib;
 using UnityEngine.EventSystems;
 using UnityEngine.Networking;
+using System.Security;
+using System.Security.Permissions;
+
+[module: UnverifiableCode]
+[assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
 
 namespace Dyson4DPocket
 {
@@ -84,7 +89,7 @@ namespace Dyson4DPocket
         }
     }
 
-    [BepInPlugin("com.github.yyuueexxiinngg.plugin.dyson.4dpocket", "4D Pocket", "1.3")]
+    [BepInPlugin("com.github.yyuueexxiinngg.plugin.dyson.4dpocket", "4D Pocket", "1.4")]
     public class The4DPocket : BaseUnityPlugin
     {
         public static ConfigEntry<KeyCode> HotKey;
@@ -148,7 +153,7 @@ namespace Dyson4DPocket
                     Debug.Log($"Old translations found, updating to new version: {TranslationsVersion}");
                     var fs = File.OpenWrite(translationsPath);
                     Assembly.GetExecutingAssembly()
-                        .GetManifestResourceStream("Dyson4DPocket.Assets.Strings.json")
+                        .GetManifestResourceStream("Dyson4DPocketOld.Assets.Strings.json")
                         .CopyTo(fs);
                     fs.Close();
 
@@ -161,7 +166,7 @@ namespace Dyson4DPocket
 
                 var fs = File.OpenWrite(translationsPath);
                 Assembly.GetExecutingAssembly()
-                    .GetManifestResourceStream("Dyson4DPocket.Assets.Strings.json")
+                    .GetManifestResourceStream("Dyson4DPocketOld.Assets.Strings.json")
                     .CopyTo(fs);
                 fs.Close();
 
@@ -241,7 +246,7 @@ namespace Dyson4DPocket
     {
         public static Pocket Instance;
 
-        private const float Version = 1.3f;
+        private const float Version = 1.4f;
 
         private bool _uiInitialized;
 
@@ -581,7 +586,7 @@ namespace Dyson4DPocket
                     )
                     {
                         _uiStation.stationId = stationId;
-                        Traverse.Create(_uiStation).Property("active").SetValue(true);
+                        _uiStation.active = true;
                         if (!_uiStation.gameObject.activeSelf)
                         {
                             _uiStation.gameObject.SetActive(true);
@@ -591,18 +596,11 @@ namespace Dyson4DPocket
                         _uiStation.transport = factory.transport;
                         _uiStation.powerSystem = factory.powerSystem;
                         _uiStation.player = GameMain.mainPlayer;
-                        Traverse.Create(_uiStation).Method("OnStationIdChange").GetValue();
-                        Traverse.Create(_uiStation).Field("eventLock").SetValue(true);
+                        _uiStation.OnStationIdChange();
 
-                        var eventInfo = _uiStation.player.GetType().GetEvent("onIntendToTransferItems");
-                        var methodInfo = _uiStation.GetType()
-                            .GetMethod("OnPlayerIntendToTransferItems", BindingFlags.NonPublic | BindingFlags.Instance);
-
-                        if (eventInfo != null && methodInfo != null)
-                        {
-                            eventInfo.AddEventHandler(_uiStation.player,
-                                Delegate.CreateDelegate(eventInfo.EventHandlerType, _uiStation, methodInfo));
-                        }
+                        _uiStation.nameInput.onValueChanged.AddListener(_uiStation.OnNameInputSubmit);
+                        _uiStation.nameInput.onEndEdit.AddListener(_uiStation.OnNameInputSubmit);
+                        _uiStation.player.onIntendToTransferItems += _uiStation.OnPlayerIntendToTransferItems;
 
                         _uiStation.transform.SetAsLastSibling();
                         _uiGame.OpenPlayerInventory();
@@ -660,7 +658,7 @@ namespace Dyson4DPocket
                     )
                     {
                         _uiStorage.storageId = storageId;
-                        Traverse.Create(_uiStorage).Property("active").SetValue(true);
+                        _uiStorage.active = true;
                         if (!_uiStorage.gameObject.activeSelf)
                         {
                             _uiStorage.gameObject.SetActive(true);
@@ -669,8 +667,8 @@ namespace Dyson4DPocket
                         _uiStorage.factory = factory;
                         _uiStorage.factoryStorage = factoryStorage;
                         _uiStorage.player = GameMain.mainPlayer;
-                        Traverse.Create(_uiStorage).Method("OnStorageIdChange").GetValue();
-                        Traverse.Create(_uiStorage).Field("eventLock").SetValue(true);
+                        _uiStorage.OnStorageIdChange();
+                        _uiStorage.eventLock = true;
                         _uiStorage.transform.SetAsLastSibling();
                         _uiGame.OpenPlayerInventory();
                         _inspectingStorage = true;
