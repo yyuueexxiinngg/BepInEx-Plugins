@@ -89,7 +89,7 @@ namespace Dyson4DPocket
         }
     }
 
-    [BepInPlugin("com.github.yyuueexxiinngg.plugin.dyson.4dpocket", "4D Pocket", "1.4")]
+    [BepInPlugin("com.github.yyuueexxiinngg.plugin.dyson.4dpocket", "4D Pocket", "1.5")]
     public class The4DPocket : BaseUnityPlugin
     {
         public static ConfigEntry<KeyCode> HotKey;
@@ -153,7 +153,7 @@ namespace Dyson4DPocket
                     Debug.Log($"Old translations found, updating to new version: {TranslationsVersion}");
                     var fs = File.OpenWrite(translationsPath);
                     Assembly.GetExecutingAssembly()
-                        .GetManifestResourceStream("Dyson4DPocketOld.Assets.Strings.json")
+                        .GetManifestResourceStream("Dyson4DPocket.Assets.Strings.json")
                         .CopyTo(fs);
                     fs.Close();
 
@@ -166,7 +166,7 @@ namespace Dyson4DPocket
 
                 var fs = File.OpenWrite(translationsPath);
                 Assembly.GetExecutingAssembly()
-                    .GetManifestResourceStream("Dyson4DPocketOld.Assets.Strings.json")
+                    .GetManifestResourceStream("Dyson4DPocket.Assets.Strings.json")
                     .CopyTo(fs);
                 fs.Close();
 
@@ -246,7 +246,7 @@ namespace Dyson4DPocket
     {
         public static Pocket Instance;
 
-        private const float Version = 1.4f;
+        private const float Version = 1.5f;
 
         private bool _uiInitialized;
 
